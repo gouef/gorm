@@ -6,12 +6,10 @@ import (
 	o_gorm "gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	// Podpora základních driverů
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 )
-
 
 func New(cfg *Config) (*o_gorm.DB, error) {
 	var dialector o_gorm.Dialector
@@ -43,7 +41,6 @@ func New(cfg *Config) (*o_gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
 	}
 
-	
 	sqlDB, err := db.DB()
 	if err == nil {
 		if cfg.MaxIdleConns > 0 {
