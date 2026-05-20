@@ -2,6 +2,8 @@ package gorm
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	o_gorm "gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,9 +33,18 @@ func New(cfg *Config) (*o_gorm.DB, error) {
 
 	gormConfig := &o_gorm.Config{}
 	if cfg.Debug {
-		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+		gormConfig.Logger = logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags), // Výstup do konzole
+			logger.Config{
+				SlowThreshold:             cfg.Logger.SlowThreshold,
+				LogLevel:                  cfg.Logger.LogLevel,
+				IgnoreRecordNotFoundError: cfg.Logger.IgnoreRecordNotFoundError,
+				ParameterizedQueries:      cfg.Logger.ParameterizedQueries,
+				Colorful:                  cfg.Logger.Colorful,
+			},
+		)
 	} else {
-		gormConfig.Logger = logger.Default.LogMode(logger.Error)
+		gormConfig.Logger = logger.Default.LogMode(cfg.Logger.LogLevel)
 	}
 
 	db, err := o_gorm.Open(dialector, gormConfig)

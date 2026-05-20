@@ -1,6 +1,18 @@
 package gorm
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm/logger"
+)
+
+type LoggerConfig struct {
+	SlowThreshold             time.Duration   `mapstructure:"slow_threshold"`
+	LogLevel                  logger.LogLevel `mapstructure:"log_level"`
+	IgnoreRecordNotFoundError bool            `mapstructure:"ignore_record_not_found_error"`
+	ParameterizedQueries      bool            `mapstructure:"parameterized_queries"`
+	Colorful                  bool            `mapstructure:"colorful"`
+}
 
 type Config struct {
 	Driver          string        `json:"driver" yaml:"driver" mapstructure:"driver"`
@@ -15,4 +27,5 @@ type Config struct {
 	MaxOpenConns    int           `json:"max_open_conns" yaml:"max_open_conns" mapstructure:"max_open_conns"`
 	ConnMaxLifetime time.Duration `json:"conn_max_lifetime" yaml:"conn_max_lifetime" mapstructure:"conn_max_lifetime"`
 	Debug           bool          `json:"debug" yaml:"debug" mapstructure:"debug"`
+	Logger          LoggerConfig  `json:"logger" yaml:"logger" mapstructure:"logger"`
 }
