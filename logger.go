@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	o_gorm "gorm.io/gorm"
@@ -97,13 +99,14 @@ func (l *GouefGormLogger) Trace(ctx context.Context, begin time.Time, fc func() 
 
 	elapsed := time.Since(begin)
 
-	sql, _ := fc()
 	gormPrefix := "[GORM]"
 	nowStr := time.Now().Format("2006-01-02 15:04:05")
 	sqlStr := "[SQL]: "
 	ErrorStr := gormPrefix + "[ERROR]: "
 	WarnStr := gormPrefix + "[WARN]: "
 	InfoStr := gormPrefix + "[INFO]: "
+
+	sql, _ := fc()
 
 	if l.Colorful {
 		gormPrefix = White + "[GORM]" + Reset
@@ -112,6 +115,7 @@ func (l *GouefGormLogger) Trace(ctx context.Context, begin time.Time, fc func() 
 		ErrorStr = gormPrefix + Red + "[ERROR]: " + Reset
 		WarnStr = gormPrefix + Magenta + "[WARN]: " + Reset
 		InfoStr = BlueBold + "[INFO]: " + Reset
+		sql = l.highlightSQL(sql)
 	}
 
 	prefix := gormPrefix
@@ -169,4 +173,41 @@ func (l *GouefGormLogger) durationFormat(elapsed time.Duration) string {
 	}
 
 	return durationPrefix + duration
+}
+
+func (l *GouefGormLogger) highlightSQL(sql string) string {
+	// Seznam hlavních SQL klíčových slov, která chceme zvýraznit
+	keywords := []string{
+		"SELECT", "INSERT", "UPDATE", "DELETE", "FROM", "WHERE", "AND", "OR",
+		"JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "ON", "ORDER BY", "GROUP BY",
+		"LIMIT", "OFFSET", "INDEX", "TABLE", "AS", "IN", "IS", "NULL", "NOT", "LIKE",
+		"CREATE", "DROP", "ALTER", "INTO", "VALUES", "SET", "COUNT", "SUM", "MIN", "MAX",
+	}
+
+	// 1. Obarvení číselných hodnot (mimo slova a identifikátory)
+	numberRe := regexp.MustCompile(`\b\d+\b`)
+	sql = numberRe.ReplaceAllStringFunc(sql, func(match string) string {
+		return Cyan + match + Reset
+	})
+
+	// 2. Zvýraznění klíčových slov (používáme regulární výraz, aby se chytala jen celá slova nezávisle na velikosti)
+	for _, kw := range keywords {
+		re := regexp.MustCompile(`(?i)\b` + kw + `\b`)
+		sql = re.ReplaceAllStringFunc(sql, func(match string) string {
+			return MagentaBold + strings.ToUpper(match) + Reset
+		})
+	}
+
+	// 3. Obarvení textových hodnot v jednoduchých uvozovkách (např. 'John')
+	stringRe := regexp.MustCompile(`'[^']*'`)
+	sql = stringRe.ReplaceAllStringFunc(sql, func(match string) string {
+		return Green + match + Reset
+	})
+
+	stringRe = regexp.MustCompile(`"[^"]*"`)
+	sql = stringRe.ReplaceAllStringFunc(sql, func(match string) string {
+		return Green + match + Reset
+	})
+
+	return sql
 }
