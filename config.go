@@ -2,16 +2,14 @@ package gorm
 
 import (
 	"time"
-
-	"gorm.io/gorm/logger"
 )
 
 type LoggerConfig struct {
-	SlowThreshold             time.Duration   `mapstructure:"slow_threshold"`
-	LogLevel                  logger.LogLevel `mapstructure:"log_level"`
-	IgnoreRecordNotFoundError bool            `mapstructure:"ignore_record_not_found_error"`
-	ParameterizedQueries      bool            `mapstructure:"parameterized_queries"`
-	Colorful                  bool            `mapstructure:"colorful"`
+	SlowThreshold             time.Duration `json:"slow_threshold" yaml:"slow_threshold" mapstructure:"slow_threshold"`
+	LogLevel                  string        `json:"log_level" yaml:"log_level" mapstructure:"log_level"`
+	IgnoreRecordNotFoundError bool          `json:"ignore_record_not_found_error" yaml:"ignore_record_not_found_error" mapstructure:"ignore_record_not_found_error"`
+	ParameterizedQueries      bool          `json:"parameterized_queries" yaml:"parameterized_queries" mapstructure:"parameterized_queries"`
+	Colorful                  bool          `json:"colorful" yaml:"colorful" mapstructure:"colorful"`
 }
 
 type Config struct {
